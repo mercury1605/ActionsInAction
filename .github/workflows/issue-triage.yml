@@ -1,4 +1,5 @@
 name: Issue triage
+
 on:
   issues:
     types: [opened, edited]
@@ -7,13 +8,22 @@ jobs:
   triage:
     runs-on: ubuntu-latest
     steps:
-      - name: Label issue
-        run: |
-          if (contains(github.event.issue.body, 'bug')) {
-            echo '::add-labels: bug';
-          } else if (contains(github.event.issue.body, 'feature')) {
-            echo '::add-labels: feature';
-          } else {
-            echo 'Labeling issue as needs-triage';
-            echo '::add-labels: needs-triage';
-          }
+      - name: Add bug label
+        if: contains(github.event.issue.body, 'bug')
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: bug
+
+      - name: Add feature label
+        if: contains(github.event.issue.body, 'feature')
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: feature
+
+      - name: Add default label
+        if: |
+          !contains(github.event.issue.body, 'bug') &&
+          !contains(github.event.issue.body, 'feature')
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: needs-triage
