@@ -1,5 +1,4 @@
 name: Issue triage
-
 on:
   issues:
     types: [opened, edited]
@@ -7,23 +6,27 @@ on:
 jobs:
   triage:
     runs-on: ubuntu-latest
+    # BẮT BUỘC: Cấp quyền ghi để sửa issue (Fix lỗi HttpError)
+    permissions:
+      issues: write 
+
     steps:
       - name: Add bug label
-        if: contains(github.event.issue.body, 'bug')
+        # Dùng ${{ }} để bọc các biểu thức logic của GitHub Actions
+        if: ${{ contains(github.event.issue.body, 'bug') }}
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: bug
 
       - name: Add feature label
-        if: contains(github.event.issue.body, 'feature')
+        # Dùng && để đảm bảo nó không phải là bug
+        if: ${{ contains(github.event.issue.body, 'feature') && !contains(github.event.issue.body, 'bug') }}
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: feature
 
-      - name: Add default label
-        if: |
-          !contains(github.event.issue.body, 'bug') &&
-          !contains(github.event.issue.body, 'feature')
+      - name: Add default label (needs-triage)
+        if: ${{ !contains(github.event.issue.body, 'bug') && !contains(github.event.issue.body, 'feature') }}
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: needs-triage
